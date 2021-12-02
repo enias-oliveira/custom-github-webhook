@@ -1,12 +1,23 @@
 defmodule CaseSwap do
   use Tesla
 
-  def create_repository_webhook(username, repository) do
-    create_github_repository_url(username, repository) |> Tesla.get()
+  plug Tesla.Middleware.BaseUrl, "https://api.github.com"
+  plug Tesla.Middleware.Headers, [{"accept", "application/vnd.github.v3+json"}, { "user-agent", "Tesla" }]
+  plug Tesla.Middleware.JSON
+
+  def create_repository_webhook(username, repository_name) do
+    is_valid_repository(username, repository_name)
   end
 
-  defp create_github_repository_url(username, repository) do
-    github_api_base_url = "https://api.github.com"
-    "#{github_api_base_url}/#{username}/#{repository}"
+  defp is_valid_repository(username, repository_name) do
+      { _, response} = get_repository(username, repository_name)
+      response.status == 200
   end
+
+  defp get_repository(username, repository_name) do
+    get("/repos/#{ username }/#{ repository_name }")
+  end
+
+
+
 end
