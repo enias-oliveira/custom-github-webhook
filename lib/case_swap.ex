@@ -1,18 +1,12 @@
 defmodule CaseSwap do
-  @moduledoc """
-  Documentation for `CaseSwap`.
-  """
+  use Tesla
 
-  @doc """
-  Hello world.
+  def create_repository_webhook(username, repository) do
+    create_github_repository_url(username, repository) |> Tesla.get()
+  end
 
-  ## Examples
-
-      iex> CaseSwap.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  defp create_github_repository_url(username, repository) do
+    github_api_base_url = "https://api.github.com"
+    "#{github_api_base_url}/#{username}/#{repository}"
   end
 end
