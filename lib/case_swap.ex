@@ -20,4 +20,12 @@ defmodule CaseSwap do
 
   defp is_valid_repository(response), do: response.status == 200
 
+  defp create_webhook_payload({_, raw_data}) do
+    user = raw_data["owner"]["login"]
+    repository = raw_data["name"]
+    issues = get_issues(raw_data["full_name"])
+    # contributors = get_contributors(raw_data["full_name"])
+
+    %{ user: user, repository: repository, issues: issues}
+  end
 end
