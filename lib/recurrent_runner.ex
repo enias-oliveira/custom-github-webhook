@@ -16,6 +16,7 @@ defmodule CaseSwap.RecurrentRunner do
   @impl true
   def handle_info(:work, state) do
     send_webhook(state)
+    exit(:normal)
     {:noreply, state}
   end
 
@@ -24,6 +25,6 @@ defmodule CaseSwap.RecurrentRunner do
   end
 
   defp send_webhook(state) do
-    CaseSwap.create_webhook_payload(state) |> CaseSwap.post_payload_to_webhook_url(@target_url)
+    CaseSwap.create_webhook_payload(state) |> CaseSwap.Github.post_payload_to_webhook_url(@target_url)
   end
 end
