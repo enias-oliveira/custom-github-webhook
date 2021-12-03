@@ -5,14 +5,10 @@ defmodule CaseSwap do
   plug Tesla.Middleware.Headers, [{"accept", "application/vnd.github.v3+json"}, { "user-agent", "Tesla" }, { "authorization", "token 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" }]
   plug Tesla.Middleware.JSON
 
-  @target_url "https://webhook.site/8b28f032-eef5-46f7-aa87-a3b9237d9768"
-
   def create_repository_webhook(username, repository_name) do
     repository_full_name = username <> "/" <> repository_name
 
-    get_repository(repository_full_name)
-    |> create_webhook_payload()
-    |> post_payload_to_webhook_url(@target_url)
+    get_repository(repository_full_name) |> CaseSwap.RecurrentRunner.start_link()
   end
 
   defp get_repository(repository_full_name) do
@@ -25,7 +21,7 @@ defmodule CaseSwap do
 
   defp is_valid_repository(response), do: response.status == 200
 
-  defp create_webhook_payload({_, raw_data}) do
+  def create_webhook_payload({_, raw_data}) do
     user = raw_data["owner"]["login"]
     repository = raw_data["name"]
     issues = get_issues(raw_data["full_name"])
@@ -57,8 +53,17 @@ defmodule CaseSwap do
     end
   end
 
-  defp parse_issues(raw_issues), do: Enum.map(raw_issues, fn issue -> %{ title: issue["title"], author: issue["user"]["login"], labels: issue["labels"]} end)
-  defp parse_contributors(raw_contributors, repository_full_name), do: Enum.map(raw_contributors, fn contributor -> %{ name: get_user_human_name(contributor["login"]), user: contributor["login"], qtd_commits: get_commits_count_by_user_in_repo(repository_full_name, contributor["login"])} end)
+  defp parse_issues(raw_issues),
+    do: Enum.map(raw_issues, fn issue -> %{ title: issue["title"], author: issue["user"]["login"], labels: issue["labels"]} end)
+
+  defp parse_contributors(raw_contributors, repository_full_name),
+    do: Enum.map(raw_contributors, fn raw_contributor -> parse_contributor(raw_contributor, repository_full_name) end)
+
+  defp parse_contributor(raw_contributor, repository_full_name) do
+      contributor_name = get_user_human_name(raw_contributor["login"])
+      contributor_commits_count = get_commits_count_by_user_in_repo(repository_full_name, raw_contributor["login"])
+      %{ name: contributor_name , user: raw_contributor["login"], qtd_commits: contributor_commits_count }
+  end
 
   defp get_contributors(repository_full_name) do
     get_repository_resource(repository_full_name, "contributors") |> parse_contributors(repository_full_name)
@@ -86,7 +91,7 @@ defmodule CaseSwap do
     get_repository_resource_by_user(repository_full_name, "commits", username)  |> length()
   end
 
-  defp post_payload_to_webhook_url(payload, target_url) do
+  def post_payload_to_webhook_url(payload, target_url) do
     post(target_url, payload)
   end
 
