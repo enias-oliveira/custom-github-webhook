@@ -2,7 +2,7 @@ defmodule CaseSwap do
   use Tesla
 
   plug Tesla.Middleware.BaseUrl, "https://api.github.com"
-  plug Tesla.Middleware.Headers, [{"accept", "application/vnd.github.v3+json"}, { "user-agent", "Tesla" }]
+  plug Tesla.Middleware.Headers, [{"accept", "application/vnd.github.v3+json"}, { "user-agent", "Tesla" }, { "authorization", "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" }]
   plug Tesla.Middleware.JSON
 
   def create_repository_webhook(username, repository_name) do
@@ -24,28 +24,40 @@ defmodule CaseSwap do
     user = raw_data["owner"]["login"]
     repository = raw_data["name"]
     issues = get_issues(raw_data["full_name"])
-    # contributors = get_contributors(raw_data["full_name"])
+    contributors = get_contributors(raw_data["full_name"])
 
-    %{ user: user, repository: repository, issues: issues}
+    %{ user: user, repository: repository, issues: issues, contributors: contributors}
   end
+
 
   defp get_issues(repository_full_name) do
-    get_issues_recursion_aux(repository_full_name, [], 1) |> parse_issues()
+    get_repository_resource(repository_full_name, "issues") |> parse_issues
   end
 
-  defp get_issues_recursion_aux(repository_full_name, acc, page_number) do
-    case fetch_issues(repository_full_name, page_number) do
-       [] -> acc
-        issues -> get_issues_recursion_aux(repository_full_name, acc ++ issues, page_number + 1)
+  defp get_repository_resource(repository_full_name, resource_name) do
+    fetch_resource_page = fn page_number -> fetch_resource(repository_full_name, resource_name, page_number) end
+    get_resource_recursion_aux(fetch_resource_page, [], 1)
     end
-  end
 
-  defp fetch_issues(repository_full_name, page_number) do
-    { _, response} = get("/repos/#{repository_full_name}/issues?page=#{page_number}")
+  defp fetch_resource(repository_full_name, resource_name, page_number) do
+    { _, response} =
+      get("/repos/#{repository_full_name}/#{resource_name}?page=#{page_number}")
     response.body
   end
 
-  defp parse_issues(raw_issues) do
-    Enum.map(raw_issues, fn issue -> %{ title: issue["title"], author: issue["user"]["login"], labels: issue["labels"]} end)
+  defp get_resource_recursion_aux(fetch_resource_page, acc, page_number) do
+    case fetch_resource_page.(page_number) do
+       [] -> acc
+      issues -> get_resource_recursion_aux(fetch_resource_page, acc ++ issues, page_number + 1)
+    end
   end
+
+  defp parse_issues(raw_issues), do: Enum.map(raw_issues, fn issue -> %{ title: issue["title"], author: issue["user"]["login"], labels: issue["labels"]} end)
+  defp parse_contributors(raw_contributors), do: Enum.map(raw_contributors, fn contributor -> contributor end)
+
+
+  defp get_contributors(repository_full_name) do
+    get_repository_resource(repository_full_name, "contributors") |> parse_contributors()
+  end
+
 end
