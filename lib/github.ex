@@ -12,7 +12,7 @@ defmodule CaseSwap.Github do
 
   def fetch_repository_resource(repository_full_name, resource_name, page_number) do
     { _, response} =
-      get("/repos/#{repository_full_name}/#{resource_name}?page=#{page_number}")
+      get("/repos/#{repository_full_name}/#{resource_name}?page=#{page_number}&per_page=100")
     response.body
   end
 
@@ -25,7 +25,7 @@ defmodule CaseSwap.Github do
 
   def fetch_repository_resource_by_user(repository_full_name, resource_name, page_number, username) do
     { _, response} =
-      get("/repos/#{repository_full_name}/#{resource_name}?page=#{page_number}&author=#{username}")
+      get("/repos/#{repository_full_name}/#{resource_name}?page=#{page_number}&author=#{username}&per_page=100")
     response.body
   end
 
