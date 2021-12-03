@@ -5,9 +5,14 @@ defmodule CaseSwap do
   plug Tesla.Middleware.Headers, [{"accept", "application/vnd.github.v3+json"}, { "user-agent", "Tesla" }, { "authorization", "token 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" }]
   plug Tesla.Middleware.JSON
 
+  @target_url "https://webhook.site/8b28f032-eef5-46f7-aa87-a3b9237d9768"
+
   def create_repository_webhook(username, repository_name) do
     repository_full_name = username <> "/" <> repository_name
-    get_repository(repository_full_name) |> create_webhook_payload()
+
+    get_repository(repository_full_name)
+    |> create_webhook_payload()
+    |> post_payload_to_webhook_url(@target_url)
   end
 
   defp get_repository(repository_full_name) do
@@ -80,4 +85,9 @@ defmodule CaseSwap do
   defp get_commits_count_by_user_in_repo(repository_full_name, username) do
     get_repository_resource_by_user(repository_full_name, "commits", username)  |> length()
   end
+
+  defp post_payload_to_webhook_url(payload, target_url) do
+    post(target_url, payload)
+  end
+
 end
