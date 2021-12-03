@@ -1,10 +1,17 @@
 defmodule CaseSwap do
   alias CaseSwap.Github
 
-  def create_repository_webhook(username, repository_name) do
+  @swap_url "https://webhook.site/8b28f032-eef5-46f7-aa87-a3b9237d9768"
+  @one_day_in_milliseconds 86400000
+
+  def create_repository_webhook!(username, repository_name, target_url, time) do
     repository_full_name = username <> "/" <> repository_name
 
-    get_repository(repository_full_name) |> CaseSwap.RecurrentRunner.start_link()
+    get_repository(repository_full_name) |> CaseSwap.RecurrentRunner.start_link({ target_url, time })
+  end
+
+  def create_repository_webhook_swap!(username, repository_name) do
+    create_repository_webhook!(username, repository_name, @swap_url, @one_day_in_milliseconds)
   end
 
   defp get_repository(repository_full_name) do

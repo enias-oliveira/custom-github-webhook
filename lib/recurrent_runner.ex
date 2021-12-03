@@ -1,15 +1,13 @@
 defmodule CaseSwap.RecurrentRunner do
   use GenServer
 
-  @target_url "https://webhook.site/8b28f032-eef5-46f7-aa87-a3b9237d9768"
-
-  def start_link(state) do
-    GenServer.start_link(__MODULE__, state)
+  def start_link(repository, webhook_info) do
+    GenServer.start_link(__MODULE__, { repository, webhook_info })
   end
 
   @impl true
   def init(state) do
-    schedule_webhook()
+    schedule_webhook(state)
     {:ok, state}
   end
 
@@ -20,11 +18,13 @@ defmodule CaseSwap.RecurrentRunner do
     {:noreply, state}
   end
 
-  defp schedule_webhook do
-    Process.send_after(self(), :work, 30_000)
+  defp schedule_webhook({_, webhook_info} ) do
+    { _, time } = webhook_info
+    Process.send_after(self(), :work, time)
   end
 
-  defp send_webhook(state) do
-    CaseSwap.create_webhook_payload(state) |> CaseSwap.Github.post_payload_to_webhook_url(@target_url)
+  defp send_webhook({ repository, webhook_info }) do
+    { target_url, _ } = webhook_info
+    CaseSwap.create_webhook_payload(repository) |> CaseSwap.Github.post_payload_to_webhook_url(target_url)
   end
 end
