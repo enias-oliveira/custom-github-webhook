@@ -1,10 +1,10 @@
 import Config
 
 config :case_swap, CaseSwap.Repo,
-  database: "case_swap_repo",
-  username: "user",
-  password: "pass",
-  hostname: "localhost"
+  database: System.get_env("DATABASE"),
+  username: System.get_env("USERNAME"),
+  password: System.get_env("PASSWORD"),
+  hostname: System.get_env("HOSTNAME")
 
 config :case_swap, ecto_repos: [CaseSwap.Repo]
 
