@@ -37,11 +37,11 @@ defmodule CaseSwap.Github do
         username
       ) do
     case get(
-        "/repos/#{repository_full_name}/#{resource_name}?page=#{page_number}&author=#{username}&per_page=100"
-      ) do
-    {_, :invalid_uri} -> []
-    {_, response} -> response.body
-      end
+           "/repos/#{repository_full_name}/#{resource_name}?page=#{page_number}&author=#{username}&per_page=100"
+         ) do
+      {_, :invalid_uri} -> []
+      {_, response} -> response.body
+    end
   end
 
   def post_payload_to_webhook_url(payload, target_url) do

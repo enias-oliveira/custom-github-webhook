@@ -5,7 +5,7 @@ defmodule CaseSwap.Worker do
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{} = args}) do
-    %{ "payload" => payload, "target_url" => target_url } = args
+    %{"payload" => payload, "target_url" => target_url} = args
     Github.post(target_url, payload)
 
     :ok
