@@ -2,16 +2,15 @@ defmodule CaseSwap do
   alias CaseSwap.Github
 
   @swap_url "https://webhook.site/8b28f032-eef5-46f7-aa87-a3b9237d9768"
-  @one_day_in_milliseconds 86400000
 
   def create_repository_webhook!(username, repository_name, target_url, time) do
     repository_full_name = username <> "/" <> repository_name
 
-    get_repository(repository_full_name) |> CaseSwap.RecurrentRunner.start_link({ target_url, time })
+    get_repository(repository_full_name) |> create_webhook_payload(target_url) |> CaseSwap.Worker.new(schedule_in: time) |> Oban.insert()
   end
 
   def create_repository_webhook_swap!(username, repository_name) do
-    create_repository_webhook!(username, repository_name, @swap_url, @one_day_in_milliseconds)
+    create_repository_webhook!(username, repository_name, @swap_url, { 1, :days })
   end
 
   defp get_repository(repository_full_name) do
@@ -23,13 +22,13 @@ defmodule CaseSwap do
 
   defp is_valid_repository(response), do: response.status == 200
 
-  def create_webhook_payload({_, raw_data}) do
+  def create_webhook_payload({_, raw_data}, target_url) do
     user = raw_data["owner"]["login"]
     repository = raw_data["name"]
     issues = get_issues(raw_data["full_name"])
     contributors = get_contributors(raw_data["full_name"])
 
-    %{ user: user, repository: repository, issues: issues, contributors: contributors}
+    %{payload: %{ user: user, repository: repository, issues: issues, contributors: contributors}, target_url: target_url}
   end
 
   defp get_issues(repository_full_name) do
