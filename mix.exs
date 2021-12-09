@@ -29,6 +29,7 @@ defmodule CaseSwap.MixProject do
     {:ecto_sql, "~> 3.0"},
     {:postgrex, ">= 0.0.0"},
     {:oban, "~> 2.10"},
+    {:mox, "~> 1.0", only: :test},
     ]
   end
 end
