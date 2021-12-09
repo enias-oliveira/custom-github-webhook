@@ -1,5 +1,4 @@
 defmodule CaseSwap do
-  alias CaseSwap.Github
   alias CaseSwap.GithubAPI
 
   @swap_url "https://webhook.site/8b28f032-eef5-46f7-aa87-a3b9237d9768"
@@ -48,7 +47,7 @@ defmodule CaseSwap do
 
   defp get_repository_resource(repository_full_name, resource_name) do
     fetch_resource_page = fn page_number ->
-      Github.fetch_repository_resource(repository_full_name, resource_name, page_number)
+      GithubAPI.fetch_repository_resource(repository_full_name, resource_name, page_number)
     end
 
     get_resource_recursion_aux(fetch_resource_page, [], 1)
@@ -79,7 +78,7 @@ defmodule CaseSwap do
       end)
 
   defp parse_contributor(raw_contributor, repository_full_name) do
-    contributor_name = Github.fetch_user_human_name(raw_contributor["login"])
+    contributor_name = GithubAPI.fetch_user_human_name(raw_contributor["login"])
 
     contributor_commits_count =
       get_commits_count_by_user_in_repo(repository_full_name, raw_contributor["login"])
@@ -97,7 +96,7 @@ defmodule CaseSwap do
 
   defp get_repository_resource_by_user(repository_full_name, resource_name, username) do
     fetch_resource_page = fn page_number ->
-      Github.fetch_repository_resource_by_user(
+      GithubAPI.fetch_repository_resource_by_user(
         repository_full_name,
         resource_name,
         page_number,

@@ -50,9 +50,57 @@ defmodule CaseSwap.Github do
 end
 
 defmodule CaseSwap.GithubAPI do
-  @callback fetch_repository(String.t()) ::  { :ok, String.t() }
+  @callback fetch_repository(String.t()) :: Tesla.Env.t()
+  @callback fetch_repository_resource(String.t(), String.t(), integer()) :: Tesla.Env.body()
+  @callback fetch_user_human_name(String.t()) :: String.t()
+  @callback fetch_repository_resource_by_user(String.t(), String.t(), integer(), String.t()) ::
+              list()
+
+  @type label :: %{
+          color: String.t(),
+          default: boolean(),
+          description: String.t(),
+          id: integer(),
+          name: String.t(),
+          node_id: String.t(),
+          url: String.t()
+        }
+  @type issue :: %{title: String.t(), author: String.t(), labels: label()}
+  @type contributor :: %{name: String.t(), qtd_commits: integer(), user: String.t()}
+  @type repository_payload :: %{
+          payload: %{
+            user: String.t(),
+            repository: String.t(),
+            issues: list(issue()),
+            contributors: list(contributor())
+          }
+        }
+
+  @callback post_payload_to_webhook_url(repository_payload()) :: Tesla.Env.result()
 
   def fetch_repository(repository_full_name), do: impl().fetch_repository(repository_full_name)
+
+  def fetch_repository_resource(repository_full_name, resource_name, page_number),
+    do: impl().fetch_repository_resource(repository_full_name, resource_name, page_number)
+
+  def fetch_user_human_name(username), do: impl().fetch_user_human_name(username)
+
+  def fetch_repository_resource_by_user(
+        repository_full_name,
+        resource_name,
+        page_number,
+        username
+      ),
+      do:
+        impl().fetch_repository_resource_by_user(
+          repository_full_name,
+          resource_name,
+          page_number,
+          username
+        )
+
+  def post_payload_to_webhook_url(payload, target_url),
+    do: impl().post_payload_to_webhook_url(payload, target_url)
 
   defp impl, do: Application.get_env(:case_swap, :github, CaseSwap.Github)
 end
