@@ -142,8 +142,29 @@ defmodule CaseSwapTest do
       )
     end
 
-    test "jobs are enqueued with provided arguments again" do
-      assert "2" == "2"
-     end
+    test "invalid username or repository name" do
+      fetch_repository_response = %Tesla.Env{
+        status: 404,
+        body: %{
+          "message" => "Not Found"
+        }
+      }
+
+      CaseSwap.MockGithubAPI
+      |> expect(:fetch_repository, fn _ -> fetch_repository_response end)
+
+      assert_raise RuntimeError, "Repository does not exist or not visible", fn ->
+        username = "mock_github_user"
+        repository_name = "mock_github_repo"
+        target_url = "https://mock_webhook_target.site/"
+
+        CaseSwap.create_repository_webhook!(
+          username,
+          repository_name,
+          target_url,
+          {1, :days}
+        )
+      end
+    end
   end
 end
