@@ -1,5 +1,6 @@
 defmodule CaseSwap do
   alias CaseSwap.Github
+  alias CaseSwap.GithubAPI
 
   @swap_url "https://webhook.site/8b28f032-eef5-46f7-aa87-a3b9237d9768"
 
@@ -16,8 +17,8 @@ defmodule CaseSwap do
     create_repository_webhook!(username, repository_name, @swap_url, {1, :days})
   end
 
-  defp get_repository(repository_full_name) do
-    Github.fetch_repository(repository_full_name) |> handle_repository_response()
+  def get_repository(repository_full_name) do
+    GithubAPI.fetch_repository(repository_full_name) |> handle_repository_response()
   end
 
   defp handle_repository_response(response),

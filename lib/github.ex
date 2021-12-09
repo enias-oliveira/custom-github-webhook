@@ -48,3 +48,11 @@ defmodule CaseSwap.Github do
     post(target_url, payload)
   end
 end
+
+defmodule CaseSwap.GithubAPI do
+  @callback fetch_repository(String.t()) ::  { :ok, String.t() }
+
+  def fetch_repository(repository_full_name), do: impl().fetch_repository(repository_full_name)
+
+  defp impl, do: Application.get_env(:case_swap, :github, CaseSwap.Github)
+end
