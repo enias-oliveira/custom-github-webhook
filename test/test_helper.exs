@@ -1,4 +1,4 @@
-Mox.defmock(CaseSwap.MockGithubAPI, for: CaseSwap.GithubAPI)
-Application.put_env(:case_swap, :github, CaseSwap.MockGithubAPI)
+Mox.defmock(Webhook.MockGithubAPI, for: Webhook.GithubAPI)
+Application.put_env(:webhook, :github, Webhook.MockGithubAPI)
 
 ExUnit.start()

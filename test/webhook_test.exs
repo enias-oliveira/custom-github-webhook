@@ -1,7 +1,7 @@
-defmodule CaseSwapTest do
+defmodule WebhookTest do
   use ExUnit.Case
-  use Oban.Testing, repo: CaseSwap.Repo
-  doctest CaseSwap
+  use Oban.Testing, repo: Webhook.Repo
+  doctest Webhook
 
   import Mox
 
@@ -59,7 +59,7 @@ defmodule CaseSwapTest do
         }
       ]
 
-      CaseSwap.MockGithubAPI
+      Webhook.MockGithubAPI
       |> expect(:fetch_repository, fn _ -> fetch_repository_response end)
       |> expect(:fetch_repository_resource, 5, fn
         _, "issues", 1 ->
@@ -88,7 +88,7 @@ defmodule CaseSwapTest do
       target_url = "https://mock_webhook_target.site/"
 
       assert {:ok, _} =
-               CaseSwap.create_repository_webhook!(
+               Webhook.create_repository_webhook!(
                  username,
                  repository_name,
                  target_url,
@@ -99,7 +99,7 @@ defmodule CaseSwapTest do
       in_an_day = DateTime.add(DateTime.utc_now(), day_in_seconds, :second)
 
       assert_enqueued(
-        worker: CaseSwap.Worker,
+        worker: Webhook.Worker,
         args: %{
           "payload" => %{
             "contributors" => [
@@ -150,7 +150,7 @@ defmodule CaseSwapTest do
         }
       }
 
-      CaseSwap.MockGithubAPI
+      Webhook.MockGithubAPI
       |> expect(:fetch_repository, fn _ -> fetch_repository_response end)
 
       assert_raise RuntimeError, "Repository does not exist or not visible", fn ->
@@ -158,7 +158,7 @@ defmodule CaseSwapTest do
         repository_name = "mock_github_repo"
         target_url = "https://mock_webhook_target.site/"
 
-        CaseSwap.create_repository_webhook!(
+        Webhook.create_repository_webhook!(
           username,
           repository_name,
           target_url,

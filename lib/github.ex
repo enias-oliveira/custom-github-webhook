@@ -1,4 +1,4 @@
-defmodule CaseSwap.Github do
+defmodule Webhook.Github do
   use Tesla
 
   plug(Tesla.Middleware.BaseUrl, "https://api.github.com")
@@ -6,7 +6,7 @@ defmodule CaseSwap.Github do
   plug(Tesla.Middleware.Headers, [
     {"accept", "application/vnd.github.v3+json"},
     {"user-agent", "Tesla"},
-    {"authorization", "token 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"}
+    {"authorization", "token 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"}
   ])
 
   plug(Tesla.Middleware.JSON)
@@ -49,7 +49,7 @@ defmodule CaseSwap.Github do
   end
 end
 
-defmodule CaseSwap.GithubAPI do
+defmodule Webhook.GithubAPI do
   @callback fetch_repository(String.t()) :: Tesla.Env.t()
   @callback fetch_repository_resource(String.t(), String.t(), integer()) :: Tesla.Env.body()
   @callback fetch_user_human_name(String.t()) :: String.t()
@@ -102,5 +102,5 @@ defmodule CaseSwap.GithubAPI do
   def post_payload_to_webhook_url(payload, target_url),
     do: impl().post_payload_to_webhook_url(payload, target_url)
 
-  defp impl, do: Application.get_env(:case_swap, :github, CaseSwap.Github)
+  defp impl, do: Application.get_env(:webhook, :github, Webhook.Github)
 end

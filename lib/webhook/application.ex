@@ -1,19 +1,19 @@
-defmodule CaseSwap.Application do
+defmodule Webhook.Application do
   @moduledoc false
 
   use Application
 
   def start(_type, _args) do
     children = [
-      CaseSwap.Repo,
+      Webhook.Repo,
       {Oban, oban_config()}
     ]
 
-    opts = [strategy: :one_for_one, name: CaseSwap.Supervisor]
+    opts = [strategy: :one_for_one, name: Webhook.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
   defp oban_config do
-    Application.fetch_env!(:case_swap, Oban)
+    Application.fetch_env!(:webhook, Oban)
   end
 end

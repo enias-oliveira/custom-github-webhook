@@ -1,44 +1,25 @@
-defmodule CaseSwap do
-  alias CaseSwap.GithubAPI
-
-  @swap_url "https://webhook.site/8b28f032-eef5-46f7-aa87-a3b9237d9768"
+defmodule Webhook do
+  alias Webhook.GithubAPI
 
   def create_repository_webhook!(username, repository_name, target_url, time) do
     repository_full_name = username <> "/" <> repository_name
 
-    get_repository(repository_full_name)
-    |> create_webhook_payload(target_url)
-    |> CaseSwap.Worker.new(schedule_in: time)
-    |> Oban.insert()
+    with %{body: body, status: 200} <- GithubAPI.fetch_repository(repository_full_name) do
+      payload = create_webhook_payload(body)
+
+      %{payload: payload, target_url: target_url}
+      |> Webhook.Worker.new(schedule_in: time)
+      |> Oban.insert()
+    end
   end
 
-  def create_repository_webhook_swap!(username, repository_name) do
-    create_repository_webhook!(username, repository_name, @swap_url, {1, :days})
-  end
-
-  def get_repository(repository_full_name) do
-    GithubAPI.fetch_repository(repository_full_name) |> handle_repository_response()
-  end
-
-  defp handle_repository_response(response),
-    do:
-      if(is_valid_repository(response),
-        do: {:ok, response.body},
-        else: raise("Repository does not exist or not visible")
-      )
-
-  defp is_valid_repository(response), do: response.status == 200
-
-  def create_webhook_payload({_, raw_data}, target_url) do
+  def create_webhook_payload(raw_data) do
     user = raw_data["owner"]["login"]
     repository = raw_data["name"]
     issues = get_issues(raw_data["full_name"])
     contributors = get_contributors(raw_data["full_name"])
 
-    %{
-      payload: %{user: user, repository: repository, issues: issues, contributors: contributors},
-      target_url: target_url
-    }
+    %{user: user, repository: repository, issues: issues, contributors: contributors}
   end
 
   defp get_issues(repository_full_name) do

@@ -1,7 +1,7 @@
-defmodule CaseSwap.Worker do
+defmodule Webhook.Worker do
   use Oban.Worker, queue: :events
 
-  alias CaseSwap.Github
+  alias Webhook.Github
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{} = args}) do

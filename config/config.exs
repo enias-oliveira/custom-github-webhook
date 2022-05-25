@@ -1,14 +1,15 @@
 import Config
 
-config :case_swap, CaseSwap.Repo,
-  database: System.get_env("DATABASE"),
-  username: System.get_env("USERNAME"),
-  password: System.get_env("PASSWORD"),
-  hostname: System.get_env("HOSTNAME")
+config :webhook, Webhook.Repo,
+  database: System.get_env("PGDATABASE"),
+  username: System.get_env("PGUSERNAME"),
+  password: System.get_env("PGPASSWORD"),
+  hostname: System.get_env("PGHOSTNAME"),
+  port: System.get_env("PGPORT")
 
-config :case_swap, ecto_repos: [CaseSwap.Repo]
+config :webhook, ecto_repos: [Webhook.Repo]
 
-config :case_swap, Oban,
-  repo: CaseSwap.Repo,
+config :webhook, Oban,
+  repo: Webhook.Repo,
   plugins: [Oban.Plugins.Pruner],
   queues: [default: 10, events: 50, media: 20]

@@ -1,4 +1,4 @@
-defmodule CaseSwap.Repo.Migrations.AddObanJobsTable do
+defmodule Webhook.Repo.Migrations.AddObanJobsTable do
   use Ecto.Migration
 
 def up do

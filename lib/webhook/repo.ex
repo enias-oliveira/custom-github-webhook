@@ -1,5 +1,5 @@
-defmodule CaseSwap.Repo do
+defmodule Webhook.Repo do
   use Ecto.Repo,
-    otp_app: :case_swap,
+    otp_app: :webhook,
     adapter: Ecto.Adapters.Postgres
 end
