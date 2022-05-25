@@ -13,3 +13,8 @@ config :webhook, Oban,
   repo: Webhook.Repo,
   plugins: [Oban.Plugins.Pruner],
   queues: [default: 10, events: 50, media: 20]
+
+config :webhook, Webhook.Github,
+  github_authorization_token: System.get_env("GITHUB_AUTHORIZATION_TOKEN")
+
+import_config "#{config_env()}.exs"

@@ -13,7 +13,7 @@ defmodule Webhook do
     end
   end
 
-  def create_webhook_payload(raw_data) do
+  defp create_webhook_payload(raw_data) do
     user = raw_data["owner"]["login"]
     repository = raw_data["name"]
     issues = get_issues(raw_data["full_name"])

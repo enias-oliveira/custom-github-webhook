@@ -26,4 +26,7 @@ case_swap-*.tar
 /tmp/
 
 
-/config/.env
+/config/dev.exs
+
+/db/
+/postgres/
