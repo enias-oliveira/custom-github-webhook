@@ -7,7 +7,7 @@ defmodule Webhook.Github do
     {"accept", "application/vnd.github.v3+json"},
     {"user-agent", "Tesla"},
     {"authorization",
-     Application.fetch_env!(:webhook, Webhook.Github)[:github_authorization_token]}
+     "token #{Application.fetch_env!(:webhook, Webhook.Github)[:github_authorization_token]}"}
   ])
 
   plug(Tesla.Middleware.JSON)
